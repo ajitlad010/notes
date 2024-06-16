@@ -2,7 +2,7 @@
 This .class file read by JVM to start its executiom on any platfor,
 JVM(JRE) reads instructions from bytecode and JIT compiler converts code to executable form.
 To view bytecode - ASM plugin
-
+=====================================================================================================
 Java reflection - modifying provate vatiabe values using reflections
 create class company > ptivate varaibale name
 getter stter
@@ -18,12 +18,12 @@ f.set(company, "ytube");
 Mthod m = Company.class.GetDeclaredmethod("displayName");
 f.setaccessible(true);
 f.invoke(company);
-
+=====================================================================================================
 What is Load Factor:
 Default load factor for hash map is 0.75
  16*0.75 = 12
 When 13th element is inserted into hashmap it creates new hash map and re hashing will be done
-
+=====================================================================================================
 Generics - to achieve typesafety we have to use generics
 At the compile time itself type safety is checked.
 eg.
@@ -61,12 +61,12 @@ Container<T extends Numer> {
 }
 //we can use super also instead of extends
 Container<? super T>  //super means ? is superclass of T
- 
+ =====================================================================================================
 Collection API -
 List      Set     Queue  
  
 Map
-
+=====================================================================================================
 Functional interface -
 If one class implementing 2 functional interfaces having same default method in both.
 Class A implements I1, I2 {
@@ -95,8 +95,7 @@ Consumer<Integer> c = (value) -> sysout(value);
 Supplier<Double> s = ()->Math.random(); sysout(s.get());
 Predicate<Integer> lessThan = i -> (i<10);   sysout(lessThan.test(8));
 Function <Integer, Double> half = (value) -> value/2.0;   Sysout(half.apply(10)); //output 5.0
-
-
+=====================================================================================================
 Optional class - 
 container obbject - enacapuslated value inside its
 value can be null or non null
@@ -105,7 +104,22 @@ name -> sout(name),
 () -> sout("vale is null");
 );
 Not only limied to nul checks , can be used witn streams.
+=====================================================================================================
+Java streams - > pipeline to process daata does not hold//store data
 
+it has intermediate functions - > lazy functions , can do chaining of intermneidate functions -> always returns stream to terminal function
+sorting filtering or transaformation of objects
+more than  intermediate functions can be used
+
+terminal finctions -> returns value or any other non stream formart
+only one termianl function should be there
+foreach
+collect
+findforst
+findany
+map -> do the transformation
+flat map > do the flattening of objects and transaformation
+=====================================================================================================
 Java generics : Bound type parameters and wild card types
 class LegacyBox 
 Object item
@@ -150,22 +164,8 @@ accepst  any types of list and treats  list as an type of obect
 type eraser  -generic type information is only available to compiler not jvm
 when genric coded is compiled into butecode it will replace generic types with objects and it will replace bounded types and it ill instert equivalent cast retrieving object
 thos shoel concept is type eraser
+=====================================================================================================
 
-
-Java streams - > pipeline to process daata does not hold//store data
-
-it has intermediate functions - > lazy functions , can do chaining of intermneidate functions -> always returns stream to terminal function
-sorting filtering or transaformation of objects
-more than  intermediate functions can be used
-
-terminal finctions -> returns value or any other non stream formart
-only one termianl function should be there
-foreach
-collect
-findforst
-findany
-map -> do the transformation
-flat map > do the flattening of objects and transaformation
 
 AtomicInteger - 
 
