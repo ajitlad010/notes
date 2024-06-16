@@ -1,0 +1,116 @@
+questions
+aggregation and composition
+
+design principles 
+S - single responsibility
+O - Open close
+L - Liskov
+I - Interface segreagation
+D - Dependency Injection
+
+
+server should pick the port automatically in spring boot 
+server.port = 0
+
+Create a project in oracle
+
+how to configure external server
+add dependency for other server
+add exclusion dependency for apache tomcat
+add relevent properties
+
+1.when using inner bean using property then bean id is not needed then if you are using bean id then can we access bean using that id in context?
+No
+
+2. is singleton bean threadsafe
+ different concepts
+
+3. can we make bean threadsafe ? how?
+Yes using simplethreadscope class of spring framework
+steps : 1. register bean of simplethreadscope with bean class CustomScopeConfigurer
+2. @Scope("thread")
+
+4. difference between service repository component
+
+5. difference between getforentity and getforobject
+object - retrieves entity from given url
+entity - retrieves ResponseEntity from given url
+
+volatile variable - reads will ve done to and from main memory. Features of synchronized
+
+maturity in rest
+https://www.javatpoint.com/restful-web-services-richardson-maturity-model
+Level 0: The Swamp of POX
+Level 1: Resources
+Level 2: HTTP Verbs
+Level 3: Hypermedia Control
+
+
+command
+decorator design pattern
+how to debug stream apis in java
+
+types of view resolver
+handler napping
+
+Create prototype bean in singleton bean-
+1. using method injection @lookup anno
+2. Using applicationcontextaware interface
+3. using inject api i.e. provider interface
+https://www.baeldung.com/spring-inject-prototype-bean-into-singleton
+
+4. Load beans in order - defines sorting order of annotated beans
+@Order(1) or @Order(Ordered.Lowest_Precedence)
+
+5. @dependson - controlling bean creation
+
+6. Immutability - once the object is created we cant change its contents
+
+7. Apart from equals and hash code
+
+8.hibernate inheritance
+
+9. Difference between web service and api
+web service - facilitates intrractions between 2 machines over a network
+api - Interface between two diffrrent applications so that they can communicate
+
+10. session leakage
+
+11. flatmap - map and flatmap both returns stream<r> . map produces one output for each input value and flat map produces zero or more valu for each input.
+map - List<List<item>>   eg.  [[1, 2],[3 , 4]]
+flat map - List<item>   eg. [1,2,3,4]
+
+
+12. spring web flux
+13. transaction in microservices
+ans :  2phase commit - co ordinator sends abort request - synchronous blocking
+
+saga pattern  - listens events on success and failed transactions.
+
+14. how spring boot application works internally
+https://gainjavaknowledge.medium.com/how-spring-boot-application-works-internally-dd9bd3ecc487#:~:text=Spring%20Boot%20Application%20Internal%20Working,that%20are%20provided%20by%20jar.&text=To%20Enable%20preconfigured%20jars%20we%20just%20need%20to%20define%20dependency%20in%20pom.
+
+
+15. Immutable list
+can be creared using Collections.unmodifiableList(list);
+
+16. compare 2 lined list
+https://www.google.com/amp/s/www.geeksforgeeks.org/identical-linked-lists/amp/
+
+17. functional interfaces in java 8
+predicate - boolean test(T t)
+binaryoperator - T apply(T x, T y)
+function - R apply(T t)
+
+https://www.google.com/amp/s/www.geeksforgeeks.org/functional-interfaces-java/amp/
+
+18. Marker
+cloneable
+serializable
+@remotingaware
+@auditaware
+@attributeoverrides
+remote interface
+
+
+difference between @contextconfiguration and @springapplicationconfiguration
