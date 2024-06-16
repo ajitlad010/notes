@@ -1,0 +1,84 @@
+Design principle -
+
+SOLID design principles -
+S- Single responsibility principle - in one class there should never by two functionalities.
+ 
+O - Open close principle - class should be open for extending and closed for modifications.  
+Example . bankAppWithdrawlService - using currentAccount and savingAccount type of accounts to withdraw and deposit amount.
+If we need to add another type of account then need to change in bankAppWithdrawlService.
+To resolve this create Abstract class Account
+And cerate Sub class for currentAccount , savingAccount & any other new
+ 
+L - LISKOV Substitution principle - Derived class should be able to substitute base class without changing code.
+From above example lets create new account type FixedTermDepositAccount
+which is extending Account abstract class
+Problem - FixedDepositAccount also has to override withdraw method which is not supported
+Solution -
+remove withdraw from account.
+ Create another separate classes 1. Abstract WithDrawableAccount    2. class FixedTermDepositAccount extends Account
+And extend currentAccount , savingAccount to WithDrawableAccount    
+And FixedTermDepositAccount need to overrride only deposit
+ 
+I - Interface segregation principle - Interface should have minimal set of abstract methods required to ensure functionality and have single functionality.
+ 
+ 
+D - Dependency injection principle - depending upon interfaces or abstract classes rather than concreate functions & classes
+example -
+class DebitCard {
+ public void doTransaction(Bigdecimal Amount) {
+   sysout("Transaction done for debit card amount : {}", amount);
+}
+}
+ 
+class CreditCard {
+ public void doTransaction(Bigdecimal Amount) {
+   sysout("Transaction done for credit card amount : {}", amount);
+}
+}
+ 
+ShoppingMall {
+private DebitCard debitCard;
+ 
+ShoppingMall (DebitCard card) {
+ this.debitCard = card;
+}
+private void doPayment(Object order, Bigdecimal amount) {
+  debitCard.doTransaction(amount);
+}
+}
+ 
+Now problem with above is shpooing mall only accepts debit card and dependent on debit card
+ 
+solution :
+Interface Card {
+public void doTransaction(Bigdecimal amount)
+}
+ 
+DebitCard implements Card {
+public void doTransaction(Bigdecimal amount) {
+ sysout("Transaction done for debit card amount : {}", amount);
+}
+}
+ 
+CreditCard implements Card {
+public void doTransaction(Bigdecimal amount) {
+ sysout("Transaction done for Credit card amount : {}", amount);
+}
+}
+ 
+ShpooingMall {
+ private Card card;
+ 
+shoppingMall(Card card) {
+ this.card = card;
+}
+ 
+public void doPayment(Object order , Bigdecimal amount) {
+ card.doTransaction(amount);
+}
+Main () {
+ Card card = new CreditCard();
+ ShoppingMall mall = new ShoppingMall(card);
+ mall.doPayment("Order for grocery" , 5000.0);
+}
+}
