@@ -1,0 +1,207 @@
+HIbernate -
+
+Hibernate:
+
+@Transactional(readOnly = false, rollbackFor = Exception.class)
+
+
+One to one example :
+
+Employee class :
+@OneToOne(fetch = FetchType.LAZY, cascade =  CascadeType.ALL)
+@JoinColumn(name="profile_Id", referencedColumnName="id")
+ private Profile profile;
+
+
+Profile class:
+@OneToOne(mappedBy = "profile")
+private Employee employee;
+=============================================================================================================================
+One to many example
+
+Employee class :
+@OneToMany(mappedBy = "employee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+private Set<EmployeeAddress> addressList;
+
+EmployeeAddress class :
+@ManyToOne(fetch = FetchType.LAZY, optional = false)
+ @JoinColumn(name = "emp_id", nullable = false)
+private Employee employee;
+
+
+add below annotations to ignore errors:
+@JsonIgnore
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
+
+=============================================================================================================================
+Custome query :
+
+@Query("SELECT e FROM Employee e LEFT JOIN e.profile "
+ + " LEFT JOIN e.addressList WHERE LOWER(e.name) = LOWER(:name)")
+ public Employee findEmployeeDetails(@Param("name") String name);
+
+
+=============================================================================================================================
+cache implementation:
+1. add dependency
+<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.cache</groupId>
+            <artifactId>cache-api</artifactId>
+        </dependency>
+
+2.  add ehcache.xml
+
+<ehcache>
+    <diskStore path="java.io.tmpdir" />
+ 
+    <defaultCache maxElementsInMemory="2000"
+            eternal="true"
+            overflowToDisk="false"
+            timeToLiveSeconds="1200" />
+             
+    <cache name="employeeCache"
+            maxElementsInMemory="2000"
+            eternal="false"
+            overflowToDisk="false"
+            timeToLiveSeconds="10000" />
+</ehcache>
+
+
+
+3. create config class CacheConfig :
+
+@Configuration
+@EnableCaching
+public class CacheConfig {
+ 
+}
+
+
+4. annotate method with cacheable
+
+@Cacheable(cacheNames="employeeCache", key="#name")
+=============================================================================================================================
+Spring jdbc
+
+1. public int update(String query)
+ used to insert, update and delete records
+ String query="insert into employee values(  
+    '"+e.getId()+"','"+e.getName()+"','"+e.getSalary()+"')";  
+    return jdbcTemplate.update(query);
+
+2. public int update(String query,Object... args)
+ used to insert, update and delete records using PreparedStatement using given arguments.
+String query="update employee set name=? where id=?";  
+return template.update(query,e.getName(),e.getId());  
+
+3. public void execute(String query)
+ used to execute DDL query.
+
+4. public T execute(String sql, PreparedStatementCallback action)
+ executes the query by using PreparedStatement callback.
+ String query="insert into employee values(?,?,?)";  
+    return jdbcTemplate.execute(query,new PreparedStatementCallback<Boolean>(){  
+    @Override  
+    public Boolean doInPreparedStatement(PreparedStatement ps)  
+            throws SQLException, DataAccessException {  
+             
+        ps.setInt(1,e.getId());  
+        ps.setString(2,e.getName());  
+        ps.setFloat(3,e.getSalary());  
+             
+        return ps.execute();  
+             
+    }  
+    })
+
+5. public T query(String sql, ResultSetExtractor rse) 
+ used to fetch records using ResultSetExtractor.
+ return template.query("select * from employee",new ResultSetExtractor<List<Employee>>(){  
+    @Override  
+     public List<Employee> extractData(ResultSet rs) throws SQLException,  
+            DataAccessException {  
+     
+        List<Employee> list=new ArrayList<Employee>();  
+        while(rs.next()){  
+        Employee e=new Employee();  
+        e.setId(rs.getInt(1));  
+        e.setName(rs.getString(2));  
+        e.setSalary(rs.getInt(3));  
+        list.add(e);  
+        }  
+        return list;  
+        }  
+    });  
+  }
+
+6. public List query(String sql, RowMapper rse)
+ used to fetch records using RowMapper.
+ return template.query("select * from employee",new RowMapper<Employee>(){  
+    @Override  
+    public Employee mapRow(ResultSet rs, int rownumber) throws SQLException {  
+        Employee e=new Employee();  
+        e.setId(rs.getInt(1));  
+        e.setName(rs.getString(2));  
+        e.setSalary(rs.getInt(3));  
+        return e;  
+    }  
+    });  
+}  
+
+=============================================================================================================================
+Spring jdbc examples in proj:
+
+in properties mention user name , pass, url
+@Bean(name="jdbcTemplate")
+Public DataSource sybaseDataSource() {
+ DataSourceBuilder dataSource = DatasourceBuilder.create().driveClassName(dbDrive).url(dbUrl).username(userName).password(password);
+ return dataSource.build();
+}
+
+1. For insert :
+MapSqlParameterSource parameters = new MapSqlParameterSource()
+.addValue("id", 1)
+.addValue("name", "ajit");
+final KeyHolder holder = new GeneratedKeyHolder();
+this.oracleNamedParameterJdbcTemplate.update(Query , parameters, holder, new String[] { "id" });
+Long id = holder.getKey() != null ? holder.getKey().longValue() : 0;
+
+2. For get
+jdbcTemplate.queryForObject("select * from employee where id = ?", new Object[]{id}, new RowMapper<Employee>() {
+@Override
+public Employee mapRow(Resultset rs, int rownumber) throws SqlException {
+ Employee e = new Employee();
+ e.setId(rs.getLong(1));
+ e.setName(rs.getString(2));
+ return e;
+ }
+});
+
+@Immutable
+used for rad only tables
+
+=============================================================================================================================
+
+Optimistic locking
+In this locking, the concurrent changes are avoided by using the versioning object. Version checks the version numbers or the timestamps to detect conflicting updates and to prevent lost updates.
+optimistic locking is based on detecting changes on entities by checking their version attribute. If any concurrent update takes place, OptmisticLockException occurs. After that, we can retry updating the data.
+
+Pessimistic locking
+On the contrary, the pessimistic locking mechanism involves locking entities on the database level.
+Each transaction can acquire a lock on data. As long as it holds the lock, no transaction can read, delete or make any updates on the locked data.
+We can presume that using pessimistic locking may result in deadlocks. However, it ensures greater integrity of data than optimistic locking.
+=============================================================================================================================
+SQL -
+
+nth highest salary in sql :
+SELECT name, salary FROM #Employee e1 WHERE 3-1 = (SELECT COUNT(DISTINCT salary) FROM #Employee e2 WHERE e2.salary > e1.salary)
