@@ -1,0 +1,173 @@
+.java file converted into .class file.
+This .class file read by JVM to start its executiom on any platfor,
+JVM(JRE) reads instructions from bytecode and JIT compiler converts code to executable form.
+To view bytecode - ASM plugin
+
+Java reflection - modifying provate vatiabe values using reflections
+create class company > ptivate varaibale name
+getter stter
+private display name
+main >
+create company and print name
+Change value ->
+
+Field f = Company.class.getDeclareadField("name");
+f.setaccessible(true);
+f.set(company, "ytube");
+
+Mthod m = Company.class.GetDeclaredmethod("displayName");
+f.setaccessible(true);
+f.invoke(company);
+
+What is Load Factor:
+Default load factor for hash map is 0.75
+ 16*0.75 = 12
+When 13th element is inserted into hashmap it creates new hash map and re hashing will be done
+
+Generics - to achieve typesafety we have to use generics
+At the compile time itself type safety is checked.
+eg.
+List<int> al = new ArrayList<>();
+al.add(1);
+al.add("sa"); //compile error
+ 
+without generics
+List al = new ArrayList();
+al.add(1);
+al.add("sa");
+ 
+if we are iterating above list we may get error at runtime
+ 
+Implementation of Util.List
+List<E> -- E represent element
+ 
+creating custom generics - can be used any letter lets use T as T represent type ,
+class Container<T> {
+  Integer value;//typesafe only for Integer
+  T value; //typesafe for whichever data type we are using when creating generics
+ public void show() {
+  System.out.println(value.getClass().getName());
+ }
+}
+ 
+ 
+Container<Integer> obj = new Container<>();
+obj.value = 9;
+obj.show();
+ 
+Create custom generic which hold type number
+Container<T extends Numer> {
+ //same as above
+}
+//we can use super also instead of extends
+Container<? super T>  //super means ? is superclass of T
+ 
+Collection API -
+List      Set     Queue  
+ 
+Map
+
+Functional interface -
+If one class implementing 2 functional interfaces having same default method in both.
+Class A implements I1, I2 {
+//gives compile error that class A inherits unwanted default method from both class
+}
+Interface I1 {
+default void methodInterface() { Sysout("Interface1")};
+}
+Interface I2 {
+default void methodInterface() { Sysout("Interface2")};
+}
+ 
+Types of Functional interfaces-
+Runnable - run method
+Comparable - compareTo
+Callable - call method
+ActionListener - actionPerformed method
+ 
+In java 8 types of Functional Interfaces -
+Consumer<T> - accept(T t) - does not return result
+Supplier<T> - T get() - does not accept any parameter and return object of T
+Predicate<T> - boolean test(T t)
+Function<T, R> - R apply(T t)
+ 
+Consumer<Integer> c = (value) -> sysout(value);
+Supplier<Double> s = ()->Math.random(); sysout(s.get());
+Predicate<Integer> lessThan = i -> (i<10);   sysout(lessThan.test(8));
+Function <Integer, Double> half = (value) -> value/2.0;   Sysout(half.apply(10)); //output 5.0
+
+
+Optional class - 
+container obbject - enacapuslated value inside its
+value can be null or non null
+userName.ifPresentOrElse(
+name -> sout(name),
+() -> sout("vale is null");
+);
+Not only limied to nul checks , can be used witn streams.
+
+Java generics : Bound type parameters and wild card types
+class LegacyBox 
+Object item
+getter stter
+
+Main>
+LegacyBox b= new Legacyox();
+b.setItem(2332);
+//to get this item
+int val = (int)b.getItem();
+sout(val);
+
+i er change to string
+need to do typecasting for string
+will not give any compile time error
+
+now using generics pass <T> -
+it gives compile time error
+no additional casting
+
+can ne used with multiple data types
+
+Upper bounded and lower boundded
+<T extends Number>
+
+accepts any [parameters whose parent class is number
+
+//multi bonded
+<T extends Nmber & Comparable>
+accepts any [parameters whose parent class is number & implemeted Comparabale inside them
+
+//upper bounded
+<T extends Comparable>
+accepts any [parameters whose parent class implemeted Comparabale inside them
+
+
+List<?> list
+ wild card object ?
+ 
+accepst  any types of list and treats  list as an type of obect
+
+type eraser  -generic type information is only available to compiler not jvm
+when genric coded is compiled into butecode it will replace generic types with objects and it will replace bounded types and it ill instert equivalent cast retrieving object
+thos shoel concept is type eraser
+
+
+Java streams - > pipeline to process daata does not hold//store data
+
+it has intermediate functions - > lazy functions , can do chaining of intermneidate functions -> always returns stream to terminal function
+sorting filtering or transaformation of objects
+more than  intermediate functions can be used
+
+terminal finctions -> returns value or any other non stream formart
+only one termianl function should be there
+foreach
+collect
+findforst
+findany
+map -> do the transformation
+flat map > do the flattening of objects and transaformation
+
+AtomicInteger - 
+
+Volatile keyword - 
+
