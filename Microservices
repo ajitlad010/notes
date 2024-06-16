@@ -1,0 +1,238 @@
+Micro sevices -
+
+Micro service design pattern -
+1. API Gateway Pattern - consider api gatewat pattern as central router in a micro service architecture which directs web traffic to right places . eg. zuul server
+
+2. Service Registry and Discovery Pattern - Each service in micro service should dynamically set and communicate to other micro service. eg. here we can use eureka
+
+3. Circuit Breaker Pattern - should activate circuit when repeated service call fails . eg. using hystrix
+
+4. Saga Pattern - this is for handling distributed transactions
+For example: In a real world like online travel booking, the Flight Booking service initiates the transaction and starts communicating with other services through events where each service follows a specific workflow like
+if successful, it sends to the next service; if it fails, it triggers a compensating transaction to maintain the data consistency.
+
+5. Loose Coupling
+ 
+6. High Cohesion
+ 
+7. Database per Service - It ensures separate and secure data storage for each service.
+
+8. Serverless Microservice (FaaS)
+ 
+9. CQRS (Command Query Responsibility Segregation) Pattern
+Command Query Responsibility Segregation is the pattern which differentiates the read and write operations in a system, which enables independent scaling,
+10. Sidecar Pattern
+
+=========================================================================================================
+
+create 3 service applications
+
+Eureka configuration for service applications :
+1. Add dependency for spring-cloud-starter-eureka-netflix-client
+ <dependency>
+ <groupId>org.springframework.cloud</groupId>
+ <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+ </dependency>
+2. Add spring-cloud version property
+ <spring-cloud.version>Greenwich.RELEASE</spring-cloud.version>
+3. add dependency-management
+<dependencyManagement>
+ <dependencies>
+ <dependency>
+ <groupId>org.springframework.cloud</groupId>
+ <artifactId>spring-cloud-dependencies</artifactId>
+ <version>${spring-cloud.version}</version>
+ <type>pom</type>
+ <scope>import</scope>
+ </dependency>
+ </dependencies>
+ </dependencyManagement>
+4. Add property
+spring.application.name=movie-service
+
+5. Use application name instead of hard coded URI
+
+6. @LoadBalancer at resttemplate bean
+
+7. Enable eureka client at application main@EnableEurekaClient
+
+Create project for Eureka discovery sever:
+1. Add dependency spring-cloud-starter-netflix-eureka-service (pom.xml)
+2. Add dependency management for spring cloud (pom.xml)
+3. Add property for spring-cloud.version - greenwich (pom.xml)
+4. Add property in properties file application.properties
+ eureka.client.register-with-eureka= false
+ eureka.client.fetch-registry=false
+And start the Eureka Discovery server
+
+=========================================================================================================
+
+To call other micro service application
+Syntax :  (Resttemplate autowire)
+
+EmployeeEntity entity = restTemplate.getForObject("http://EMPLOYEE-MAPPING-DATA-SERVICE/findEmployee/"+id, EmployeeEntity.class);
+
+=========================================================================================================
+Micro sevices -
+
+Level 1 :
+Communication and service discovery
+
+Micro services Level 2:
+Fault tolerance and Resiliance :
+
+1. Fault tolerance :
+ what if a microservice goes down, what is the impact of the fault, and the tolerance.
+2. Resiliance :
+ how many faults a system can tolerate describes resiliance
+
+1. If a service is taking too long to respond causes other services slow
+ because when a request comes in tomcat creates new thread and after returning response thread dies.
+ if a service is slow then new thread will get created as per api calls, and once concurrent thread capacity reaches to maximum causes other service API to
+ wait for a thread and makes other services slow
+Solution 1 :
+ 1. Adding time outs
+ @Bean
+ @LoadBalanced
+ public RestTemplate getRestTemplate() {
+ HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+ clientHttpRequestFactory.setConnectTimeout(3000);
+ return new RestTemplate(clientHttpRequestFactory);
+ }
+
+After adding timeout of 3 second , if multiple API calls getting in 3 second same problem can occur again.
+
+Solution 2 :
+If service is slow, then hold other requests to call and once the service recovers then process requets as usual.
+Temporary solution, to wait for some time. Temporarily stop the requests.
+
+Circuit breaker pattern :
+1. Last n requests to consider for decision 5
+2. how many of those should fail  3
+3. Timeout duration : 2s
+4. how long to wait (sleep window) : 10s
+
+Fallback mechanism (when we hold on to call requests ):
+1. Throw an error
+2. return a default fallback response
+3. save previous responses(cache) and use that when possible
+
+Automatic recovery
+
+1. Hystrix
+open source library created by netflix
+implements circuit breaker parameter
+give it the configuration parameter and it does work
+works well with spring boot
+x
+Steps:
+1. add maven dependency spring-cloud-starter-netflix-hystrix
+2. add annotation in main class
+ @EnableCircuitBreaker
+
+3. Add @HystrixCommand to methods that needs circuit breakers
+
+4. configure hystrix behaviour
+exmample :
+ @PostMapping("/findEmployeeDetails")
+ @HystrixCommand(fallbackMethod="getFallBackEmployeeDetails")
+ public Employee findEmployeeDetails(@RequestParam("name") String name) {
+ 
+ String id = "2";
+ EmployeeEntity entity = restTemplate.getForObject("http://EMPLOYEE-MAPPING-DATA-SERVICE/findEmployee/"+id, EmployeeEntity.class);
+ Employee e = new Employee(Long.valueOf(entity.getId()), entity.getName(), 0L, 1L, null, null);
+ if(e != null) {
+ return e;
+ } else {
+ throw new EmployeeNotFoundException();
+ }
+ }
+
+if above micro service is not working then have to provide the fallback method with same signature and provide the name of fallback method in hystrixCommand
+ 
+ public Employee getFallBackEmployeeDetails(@RequestParam("name") String name) {
+ return new Employee(0L, "Fallback employee", 0L, 0L, null, null);
+ }
+
+Level 3 : Configurations
+Features of spring boot and micro services.
+DB connections
+Credentials
+Feature Flags
+Business logic configuration parameters
+Scenario testing
+spring boot cofiguration
+=========================================================================================================
+Rest :
+Difference between
+@Getmapping
+ Can be bookmarked
+ Can be cached
+ Parameters remain in browser history
+ Restrictions on data length
+ Data is visible to everyone in the URL
+
+@Postmapping
+ Not cached
+ Cannot be bookmarked
+ Parameters are not saved in browser history
+ No Restrictions on data length
+ Data is not displayed in the URL
+
+The difference between POST and PUT is that PUT requests are idempotent.
+That is, calling the same PUT request multiple times will always produce the same result.
+In contrast, calling a POST request repeatedly have side effects of creating the same resource multiple times.
+
+=========================================================================================================
+localhost:8080/findAllEmployeesPost/1?name="ajit"
+@PathVariable  : 1
+@RequestParam : after ?
+
+=========================================================================================================
+1. Using external properties file:
+create properties file at same path of .jar file
+it overwrites the properties file.
+
+2. Can pass arguments with command line.
+eg. java -jar myApp.jar --my.greeting="Hi from cmd line"
+
+3.if value not available in properties file will get error while creating bean
+ can provide default value if property not present (using : )
+@Value("${my.greeting : greeting from defalt val}")
+
+4. can add list in property file also
+my.proplit = one,two,three
+
+5. start spring boot application on any available port, in spring boot we communicate with other servies using spring.application.name
+when we have multiple instances , service discovery & api gateway of a MS then only we can use below property
+server.port = 0
+
+=========================================================================================================
+@ConfigurationProperties
+Create class with above annotation with @Configuration and read all properties from prop file.
+eg. @ConfigurationProperties("db")
+read all properties from prop file which starts with db
+=========================================================================================================
+Actuator :
+Exposes rest end point to where we can get all configuration properties that exposes in app by ourself or by spring boot app
+Steps:
+1. add dependency
+2. management.endpoints.web.exposure.include=* #to expose all end points by actuator
+
+localhost:8080/actuator/configprops
+=========================================================================================================
+YAML fles:
+
+Yet another mark up Language -> YAML Aint Markup Language : to store data elements
+syntax :
+key:value
+replace properties file to yaml file and replace = with :
+Text considered as string
+eg. management.endpoints.web.exposure.include : "*"
+Advantage :
+
+app :
+ name : myApp
+ desription:Welcome description
+
+No need to repeat app name
