@@ -1,0 +1,248 @@
+1. Bean scopes : singleton, prototype, request, session, global
+
+Default : SingleTon
+@Autowired : Default type is byType (if more beans of same type defined then exception will be thrown)
+
+2. Dependency Injection :
+a. Dependency Injection using Constructor way:
+<bean id = "employee" class = "com.javatpoint.Employee">
+ <constructor-arg type="int" value = "20"></constructor-arg>
+ <constructor-arg value = "ajit"></constructor-arg>
+</bean>
+
+
+b. Using list/map in bean creatinon (Setter Way)  :
+
+<bean id="employee" class = "com.javatpoint.Employee" scope="prototype">
+ <property name="id" value="1"></property>
+ <property name="departments">
+ <list>
+ <value>"JAVA"</value>
+ </list>
+ </property>
+ <property name="skillSet">
+ <map>
+ <entry key="1" value="JAVA"/>
+ </map>
+ </property>
+ </bean>
+
+c. Autowied :
+Types : 1. byName
+ 2. byType (only one child bean of same type is created, if multiple beans of same type are present then exception will be thrown)
+ 3. constructor
+
+<bean id = "employee"  class="com.javatpoint.Employee" autowire="byName">
+</bean>
+<bean id = "employeeDetails" class="com.javatpoint.EmployeeDetails">
+ <property name="address" value="Pune"></property>
+</bean>
+=====================================================================================================================================================================================================
+3. Bean lifecycle
+
+Interfaces :
+a. initializing bean (AbstractApplicationContext) :
+ override afterpropertiesset method
+ registershutdownhook-> destroy is called
+b. DisposableBean
+ override destroy() method
+c. init-method="myInit" in config xml file
+d. destroy-method="myDestroy" in config xml file
+e. to add init destroy method at global level
+ <beans default-init-method = "myInit" default-destroy-method="myDestroy">
+ </beans>
+f. Order of execution of initializing bean and init methods
+ 1. initializing bean-> properties Set
+ 2. init - myInit method
+ 3. Disposal Bean-> destroy method
+ 4. destroy - myDestroy method
+
+g. BeanPostProcessor interface : Executes after/before every bean initializes
+ 1. PostProcessAfterInitialization(Object bean, String beanName)
+ 2. PostProcessBeforeInitialization(Object bean, String beanName)
+
+h. BeanFactoryPostProcessor interface : Executes After Bean factory initializes (Though we are using applicationContext still works as ApplicationContext built upon the build factory)
+ 1. postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
+
+i. To read property from other properties file
+ "${pointA.pointX}"
+<bean class="org.springframework.beans.factory.config.propertyPlaceHolderConfigurer">
+ <property name = "locations" value="pointsConfig.properties"/>
+</bean>
+j. ApplicationContextAware interface :
+ Provides context in Bean by overriding method setApplicationContext(ApplicationContext args0)
+=====================================================================================================================================================================================================
+4. Some useful annotations:
+a. @Required  (Requires BeanPostProcessor bean in xml file as this does the background validation)
+ to validate the bean
+b. @Autowired
+ first try to find bean byType and then byName (if multiple beans of same name present in spring.xml file then exception)
+c. @Qualifier
+ if there are multiple beans of same type then use qualifier annotation so that context will inject bean byName
+d. @Resource (JSR annotation)
+ Injection by Name
+ syntax : @Resource(name="employeeDetails")
+
+e. @PostConstruct
+f.  @PreDestroy
+g. @Component :
+ to consider a class as bean (used at class level)
+=====================================================================================================================================================================================================
+Relax binding - When we configure a property using @Value annotation - it searches for property in application.properties file with below 4 cases-
+camel case - serverName
+kabab case - server-name
+snake case - server_name
+CAPS snake - SERVER_NAME - this is relax binding.
+=====================================================================================================================================================================================================
+to use yml file - need to add 3 properties - this will use application.yml file instead of properties file
+SourceProperty(classpath = "yml")
+EnableConfigurationProperties
+ConfigurationProperties
+=====================================================================================================================================================================================================
+Spring profiles - to have multiple environment specific configuration -
+we can pass env name in arguments while starting spring boot app it will pick application-prod.properties file as profile.
+Or we can set application.properties file which profile to use using property - spring.profiles.active = prod
+=====================================================================================================================================================================================================
+AOP in short details -
+Aspect oriented programming - Used to modularize the project and resolve cross cutting concerns
+like - logging, transactions, security
+Aop - advice, pointcut,jointpoint
+ 
+4 types of advice - @Before @AfterReturning @Afterthrowing @Around
+ 
+@Before("* com.ajit.demo.controller.*.*(..) ")
+public void logMessage() {
+  sysout("before message");
+}
+ 
+@Afterreturning("* com.ajit.demo.controller.*.*(..) ")
+public void afterReturning(Object object) {
+ sysout("after returning");
+}
+ 
+@Around(Jointpoint point)
+public void aroundMessage() {
+ sysout("Before execution of message": startTime);
+ 
+Jointpoint jp = point.proceed(); //starts execution of method
+ 
+sysout("After completion time taken : ", startTime-endTime)
+}
+ 
+has context menu
+breakdown of joint point -  * com.ajit.demo.controller.*.*(..)
+'*'- return type
+com.ajit - package name
+controller.* - inside controller package any class
+' * . *' - any method
+(..) - any argument
+=====================================================================================================================================================================================================
+Actuator - it gives production ready features like checking health of application or beans or threads or info
+it can be enabled by adding artifact in pom.xml and add property to enable actuator in app.properties file
+=====================================================================================================================================================================================================
+Spring AOP in detail :
+Steps:
+1. add 5 jars: Aspectjrt, aspectweaver, cglib, Aopalliance, asm
+2. Aspect contains no. of advices
+3. Convert standard class into aspect class : @Aspect
+ <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+ Before method execution
+Annotations :
+
+1. Before method of this name :
+ @Before("execution(public String getName())")
+2. Only for getname method of circle class
+ @Before("execution(public String com.ajit.Circle.getName())")
+
+
+2. PointCuts and WildCards:
+ wildcard :
+ @Before("execution(public * get*())")  <---  PointCuts defining for advices
+ Will run advice before any return type , but method name starts with get
+ 
+ @Pointcut("execution(* get*())")
+ public void allGetters() {}
+ Use "allGetters"(which is created as dummy method to use as pointcut for all point cuts)  as pointcut expression to match multiple adivces
+ @Before("allGetters")
+ public void testGetter() {
+ sysout("A");
+ }
+
+ @Pointcut("within(com.ajit.Circle)")
+ public void allCircleMethods() {}
+ Use allCircleMethods as point cut to run all methods within class circle
+
+JoinPoint :
+1. That prints the details of the method which is getting executed (joinPoint.toString())
+2. target : That gets the Object of which method is getting executed
+ 
+public void LoggingAdvice(JoinPoint joinPoint) {
+ System.out.println(joinPoint.toString())
+}
+@Before("args(name)") <== to get the parameter value which we are passing (pointcut  -> all method that takes argument as => name)
+public voif setMethodAdvice(String name) {
+ System.out.println("Set method called , value is " + name)
+}
+
+ @After("args(name)")
+ executes after method
+ 
+ @AfterReturning("args(name)")
+ executes after method if it executes without any exception
+
+ @AfterReturning(pointcut="args(name)", returning="returnString") //executes after method those which sets argument name  and returns string
+ public void setMethodAdvice(String name, String returnString) {
+ System.out.println("Value + " name + "return string value : " + returnString); 
+ }
+
+ 
+ @AfterThrowing("args(name)")
+ executes after throwing exception , can catch exception here also
+ @AfterThrowing(pointcut= "args(name)", throwing="ex") // can get the exception here also
+ 
+ @Around("allGetters") // gets executed before and after execution of method
+ public void myAroundAdvice(ProceedingJoinPoint proceedingJoinPoint) {
+ try {
+ System.out.println("Before advice");
+ proceedingJoinPoint.proceed(); // can get the return value of executing method using Object return = proceedingJoinPoint.proceed();
+ System.out.println("After advice");
+ } catch (Exception e) {
+ System.out.println(e);
+ }
+ System.out.println("MyAround Advice");
+ }
+=====================================================================================================================================================================================================
+5. Spring transaction Management
+ a) Transaction propogation :
+ 1. Required: Code will always run in a transaction. Creates a new transaction or reuses one if available.
+ 2. Requires_new: Code will always run in a new transaction. Suspends the current transaction if one exists.
+ 3. Mandatory : method must run within a transaction. If no existing transaction is in progress, an exception will be thrown
+ 4. Not_Supported : If DataSourceTransactionObject T1 is already started for Method M1.If another method M2 is run concurrently .
+ Then M2 should not run within transaction context. T1 is suspended till M2 is finished.
+ 5. Never : None of the methods run in transaction context.
+
+ b) Scenarios :
+ a. Dirty reads - If T1 transaction reads data from table A1 that was written by another concurrent transaction T2.If on the way T2 is rollback,the data obtained by T1 is invalid one
+ b. Non repeatable reads - If T1 transaction reads data from table A1.If another concurrent transaction(T2) update data on table A1.Then the data that T1 has read is different from table A1
+ c. Phantom reads - If T1 transaction reads data from table A1 with certain number of rows. If another concurrent transaction(T2) inserts more rows on table A1
+
+ c) isolation levels :
+ 1. ISOLATION_READ_UNCOMMITTED
+ 2. ISOLATION_READ_COMMITTED
+ 3. ISOLATION_REPEATABLE_READ
+ 4. ISOLATION_SERIALIZABLE
+
+context.registershutdownhook();
+- for registering shut down hook , this invokes when main method gets completed it calls destroy method for clean up.
+=====================================================================================================================================================================================================
+Bean inheritance : The child bean automatically inherits the properties from parent bean.
+ Below example, childTriangle inherits pointA from parent.
+
+  <bean id = "parentTriangle" class = "com.ajit.Triangle">
+      <property name = "pointA" ref="pointOne"/>
+   </bean>
+
+   <bean id ="childTriangle" class = "com.ajit.Triangle" parent = "parentTriangle">
+      <property name = "pointB" value = "pointTwo"/>
+   </bean>
+=====================================================================================================================================================================================================
